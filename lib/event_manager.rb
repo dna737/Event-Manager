@@ -21,22 +21,25 @@ def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
 
-contents.each do|row|
+contents.each do |row|
   name = row[:first_name]
 
   zipcode = clean_zipcode(row[:zipcode])
-  
+
   begin
-  legislators = civic_info.representative_info_by_address(
-    address: zipcode,
-    levels: 'country',
-    roles: ['legislatorUpperBody', 'legislatorLowerBody']
-  )
-  legislators = legislators.officials
-  rescue
-    "'You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials'"
+    legislators = civic_info.representative_info_by_address(
+      address: zipcode,
+      levels: 'country',
+      roles: ['legislatorUpperBody', 'legislatorLowerBody']
+    )
+    legislators = legislators.officials
+
+    legislator_names = legislators.map(&:name)
+
+    legislators_string = legislator_names.join(", ")
+  rescue => exception 
+    'You can find your representatives by visiting www.commoncause.org/take-action/find-elected-officials'
   end
 
-  
-  puts "#{name} #{zipcode} #{legislators}"
+  puts "#{name} #{zipcode} #{legislators_string}"
 end
