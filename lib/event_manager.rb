@@ -41,6 +41,10 @@ def clean_phones(phone)
   "XXXXXXXXXX"
 end
 
+def find_peak_hour(times)
+  p times
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -52,15 +56,20 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
+times = [] #stores the time registered for each attendee.
+
 contents.each do |row|
   id = row[0]
   name = row[:first_name]
   zipcode = clean_zipcode(row[:zipcode])
   home_phones = clean_phones(row[:homephone])
   legislators = legislators_by_zipcode(zipcode)
-  puts "#{name}: #{clean_phones(row[:homephone])}"
+
+  times.push(row[:regdate].split[1]) #fetches the hour
 
   form_letter = erb_template.result(binding)
 
   save_thank_you_letter(id,form_letter)
 end
+
+find_peak_hour(times.map{|hour| hour.split(":")[0].to_i})
