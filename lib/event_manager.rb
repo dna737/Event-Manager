@@ -42,7 +42,9 @@ def clean_phones(phone)
 end
 
 def find_peak_hour(times)
-  p times
+  occurrences = Hash.new(0) 
+  times.each{|time| occurrences[time] += 1}
+  occurrences.sort_by{|key,value| value}[-1]
 end
 
 puts 'EventManager initialized.'
