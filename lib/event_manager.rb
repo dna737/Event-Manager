@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'date'
 
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5,"0")[0..4]
@@ -47,6 +48,21 @@ def find_peak_hour(times)
   occurrences.sort_by{|key,value| value}[-1]
 end
 
+def find_peak_day(dates)
+  reference = {0 => "Sunday",
+    1 => "Monday", 
+    2 => "Tuesday",
+    3 => "Wednesday",
+    4 => "Thursday",
+    5 => "Friday",
+    6 => "Saturday"}
+  days = dates.map{|date| date.wday}
+  occurrences = Hash.new(0)
+  days.each{|day| occurrences[day] += 1}
+  result = occurrences.sort_by{|key,value| value}[-1][0]
+  puts "Most people registered on #{reference[result]}."
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -58,7 +74,8 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 
-times = [] #stores the time registered for each attendee.
+times = [] #stores the time an attendee was registered.
+dates = []  #stores the dates an attendee was registered.
 
 contents.each do |row|
   id = row[0]
@@ -68,6 +85,7 @@ contents.each do |row|
   legislators = legislators_by_zipcode(zipcode)
 
   times.push(row[:regdate].split[1]) #fetches the hour
+  dates.push(row[:regdate].split[0]) #fetches the day
 
   form_letter = erb_template.result(binding)
 
@@ -75,3 +93,4 @@ contents.each do |row|
 end
 
 find_peak_hour(times.map{|hour| hour.split(":")[0].to_i})
+find_peak_day(dates.map{|date| Date.strptime(date, "%m/%d/%y")})
