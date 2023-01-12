@@ -45,7 +45,8 @@ end
 def find_peak_hour(times)
   occurrences = Hash.new(0) 
   times.each{|time| occurrences[time] += 1}
-  occurrences.sort_by{|key,value| value}[-1]
+  result = occurrences.sort_by{|key,value| value}[-1][0]
+  puts "The peak hour is #{result} O' clock"
 end
 
 def find_peak_day(dates)
